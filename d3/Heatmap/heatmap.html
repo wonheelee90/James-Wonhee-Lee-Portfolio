@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="../lib/d3.v3.min.js"></script>
+        <style type="text/css">
+            #select{
+                width:50px;
+                font-size:15px;
+                text-align:center;
+            }
+            }
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
+            .axis text {
+                font-family: sans-serif;
+                font-size: 15px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="heatmap"></div>
+        <select id="select">
+        <option value="s1" selected="selected">s1</option>
+        <option value="s2">s2</option>
+        <option value="s3">s3</option>
+        <option value="s4">s4</option>
+        <option value="s5">s5</option>
+        <option value="s6">s6</option>
+        </select>
+        <script type="text/javascript">
+        
+        d3.csv("heatmap.csv", function(wide_data) {
+            var long_data = [];
+            wide_data.forEach( function(row) {
+                Object.keys(row).forEach( function(colname) {
+                if(colname == "episode" || colname == "season") {
+                    return
+                }
+                long_data.push({"episode": row["episode"], "season": row["season"], "apps": row[colname], "house": colname});
+            });
+        });
+
+        var select = d3.select("#select")
+                        .on('change', function() {onchange(this.value);})
+
+        var gridSize = 50,
+            h = gridSize,
+            w = gridSize;
+
+        var margin = {top: 50, right: 150, bottom: 250, left: 50},
+            width = 700 - margin.left - margin.right,
+            height = 650 - margin.top - margin.bottom;
+
+        var s1 = long_data.slice(0,70);
+        var s2 = long_data.slice(70, 140);
+        var s3 = long_data.slice(140, 210);
+        var s4 = long_data.slice(210, 280);
+        var s5 = long_data.slice(280, 350);
+        var s6 = long_data.slice(350, 420);
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var x = d3.set(s1.map(function(d) {return +d.episode;})).values();
+            var y = d3.set(s1.map(function(d) {return d.house;})).values();
+
+            var xScale = d3.scale.linear()
+            .domain([1, 11])
+            .range([margin.left, margin.left + width]);
+
+            var yScale = d3.scale.ordinal()
+            .domain(y)
+            .rangeBands([margin.top, margin.top + height]);    
+
+            var colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"];
+
+            var colorScale = d3.scale.quantile()
+                .domain([0, 10, d3.max(s1, function (d) { return +d.apps; })])
+                .range(colors);
+
+            var yLabels = svg.selectAll(".yLabel")
+                .data(y)
+                .enter().append("text")
+                .text(function (d) { return d; })
+                .attr("x", 0)
+                .attr("y", function (d, i) { return 75 + i * gridSize; })
+                .style("text-anchor", "middle");
+            
+            var xLabels = svg.selectAll(".xLabel")
+                .data(x)
+                .enter().append("text")
+                .text(function(d) { return d; })
+                .attr("x", function(d, i) { return 75 + i * gridSize; })
+                .attr("y", margin.top + height + 25)
+                .style("text-anchor", "middle");
+
+            var heatMap = svg.selectAll(".heatmap")
+                .data(s1, function(d) { return d.house + ':' + d.episode; })
+                .enter().append("rect")
+                .attr("x", function(d) { return xScale(d.episode); })
+                .attr("y", function(d) { return yScale(d.house); })
+                .attr("width", function(d) { return w; })
+                .attr("height", function(d) { return h; })
+                .style("fill", function(d) { return colorScale(d.apps); });
+
+            var legend = svg.selectAll(".legend")
+                .data([0].concat(colorScale.quantiles()), function(d) { return d; });
+
+                legend.enter().append("g")
+                      .attr("class", "legend");
+
+                legend.append("rect")
+                    .attr("x", function(d, i) { return 50 + 50 * i; })
+                    .attr("y", margin.top + height + 100)
+                    .attr("width", 50)
+                    .attr("height", 20)
+                    .style("fill", function(d, i) { return colors[i]; });
+
+                legend.append("text")
+                    .attr("class", "text")
+                    .text(function(d) { return Math.round(d); })
+                    .attr("x", function(d, i) { return 50 + 50 * i; })
+                    .attr("y", margin.top + height + 95);
+
+                legend.exit().remove();
+
+                svg.append("text")
+                    .attr("x", 50)
+                    .attr("y", margin.top + height + 75)
+                    .style("text-anchor", "start")
+                    .style("font-weight", "bold")
+                    .text("Number of Appearences");
+
+                svg.append("text")
+                    .attr("x", margin.left + width/2)
+                    .attr("y", 0)
+                    .style("text-anchor", "middle")
+                    .style("font-size", 20)
+                    .style("font-weight", "bold")
+                    .text("A Visualization of Ice and Fire");
+
+                svg.append("text")
+                    .attr("x", 3)
+                    .attr("y", 30)
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text("House");
+
+                svg.append("text")
+                    .attr("x", 575)
+                    .attr("y", 425)
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text("Episode");
+
+                svg.append("text")
+                    .attr("x", 0)
+                    .attr("y", 598)
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text("Season");
+
+        function onchange(value) {
+
+            if (value == "s1") {var season = s1};
+            if (value == "s2") {var season = s2};
+            if (value == "s3") {var season = s3};
+            if (value == "s4") {var season = s4};
+            if (value == "s5") {var season = s5};
+            if (value == "s6") {var season = s6};
+
+            d3.select("svg").remove();
+            
+            var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var x = d3.set(season.map(function(d) {return +d.episode;})).values();
+            var y = d3.set(season.map(function(d) {return d.house;})).values();
+
+            var xScale = d3.scale.linear()
+            .domain([1, 11])
+            .range([margin.left, margin.left + width]);
+
+            var yScale = d3.scale.ordinal()
+            .domain(y)
+            .rangeBands([margin.top, margin.top + height]);    
+
+            var colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"];
+
+            var colorScale = d3.scale.quantile()
+                .domain([0, 10, d3.max(season, function (d) { return +d.apps; })])
+                .range(colors);
+
+            var yLabels = svg.selectAll(".yLabel")
+                .data(y)
+                .enter().append("text")
+                .text(function (d) { return d; })
+                .attr("x", 0)
+                .attr("y", function (d, i) { return 75 + i * gridSize; })
+                .style("text-anchor", "middle");
+            
+            var xLabels = svg.selectAll(".xLabel")
+                .data(x)
+                .enter().append("text")
+                .text(function(d) { return d; })
+                .attr("x", function(d, i) { return 75 + i * gridSize; })
+                .attr("y", margin.top + height + 25)
+                .style("text-anchor", "middle");
+
+            var heatMap = svg.selectAll(".heatmap")
+                .data(season, function(d) { return d.house + ':' + d.episode; })
+                .enter().append("rect")
+                .attr("x", function(d) { return xScale(d.episode); })
+                .attr("y", function(d) { return yScale(d.house); })
+                .attr("width", function(d) { return w; })
+                .attr("height", function(d) { return h; })
+                .style("fill", function(d) { return colorScale(d.apps); });
+
+            var legend = svg.selectAll(".legend")
+                .data([0].concat(colorScale.quantiles()), function(d) { return d; });
+
+                legend.enter().append("g")
+                      .attr("class", "legend");
+
+                legend.append("rect")
+                    .attr("x", function(d, i) { return 50 + 50 * i; })
+                    .attr("y", margin.top + height + 100)
+                    .attr("width", 50)
+                    .attr("height", 20)
+                    .style("fill", function(d, i) { return colors[i]; });
+
+                legend.append("text")
+                    .attr("class", "text")
+                    .text(function(d) { return Math.round(d); })
+                    .attr("x", function(d, i) { return 50 + 50 * i; })
+                    .attr("y", margin.top + height + 95);
+
+                legend.exit().remove();
+
+                svg.append("text")
+                    .attr("x", 50)
+                    .attr("y", margin.top + height + 75)
+                    .style("text-anchor", "start")
+                    .style("font-weight", "bold")
+                    .text("Number of Appearences");
+
+                svg.append("text")
+                    .attr("x", margin.left + width/2)
+                    .attr("y", 0)
+                    .style("text-anchor", "middle")
+                    .style("font-size", 20)
+                    .style("font-weight", "bold")
+                    .text("A Visualization of Ice and Fire");
+
+                svg.append("text")
+                    .attr("x", 3)
+                    .attr("y", 30)
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text("House");
+
+                svg.append("text")
+                    .attr("x", 575)
+                    .attr("y", 425)
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text("Episode");
+
+                svg.append("text")
+                    .attr("x", 0)
+                    .attr("y", 598)
+                    .style("text-anchor", "middle")
+                    .style("font-weight", "bold")
+                    .text("Season");
+
+                };
+        });
+        </script>
+    </body>
+</html>

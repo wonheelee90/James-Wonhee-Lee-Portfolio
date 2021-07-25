@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <head>
+        <meta charset = "utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title> Exploring Terrorism </title>
+        <link href="../static/css/styles.css" rel="stylesheet">
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src= "https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.js"></script>
+
+    </head>
+
+    <body>
+
+
+
+         <!-- Range slider code -->
+        <script src="../static/js/d3RangeSlider.js"></script>
+
+        <!-- Range slider style -->
+        <link href="../static/css/d3RangeSlider.css" rel="stylesheet">
+
+        <nav>
+            <div class="navbar">
+                <img  class ="nav_logo" src="../static/img/logo_small.png">
+                <a class="current-page" href="#">
+                    Explore
+                </a>
+                <a href="analysis.html">
+                    Analysis
+                </a>
+                <a href="dataset.html">
+                    Dataset
+                </a>
+                <a id="about" href="about.html">
+                    About
+                </a>
+            </div>
+
+        </nav>
+
+        <div class="time_slider">
+            <div id="slider-container"></div>
+            <div id="axis-label"></div>
+            <div id="range-label"></div>
+        </div>
+
+        <div id="map"></div>
+    <!--     <div id="tooltip">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100px" height="100px" />
+        </div> -->
+
+        <div class="sub_all">
+            <div class="sub_left">
+                <!-- <form id = "Dropdown-Form" action='/explore' method="GET"> -->
+                <!-- <form role="form" id = "Dropdown-Form"> -->
+                    <div class="form-group">
+                        <div class="input-group">
+                            <p class="sub_title">Conduct your own analysis</p>
+                            <p class="text1">Explore the relationship between terrorism casualties and another attribute in a certain country</p>
+                            <div style="margin-bottom: 5px;">
+                                <p class="sub_instruction"><span style="margin-right: 5px;">Step1:</span><span>Select the attribute you want to explore here</span></P>
+
+                                <select 
+
+                                    id= "multiselect"
+                                    name="GTD_attributes"
+                                    class="selectpicker form-control">
+                                        {% for attribute in attributes %}
+                                        <!-- extracting all the attributes/column headers of GTD -->
+                                        <option href = "{{ attribute }}">{{ attribute }}
+                                        </option>
+                                        {% endfor %}
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 5px;">
+                                <p class="sub_instruction"><span style="margin-right: 5px;">Step2:</span><span>Select the country you want to explore</span></p>
+                                <select
+                                id= "country"
+                                name="country"
+                                class="selectpicker form-control">
+                                {% for country in countries %}
+                                <!-- extracting all the countries of GTD -->
+                                <option href = "{{ country }}">{{ country }}
+                                </option>
+                                {% endfor %}
+                                </select>
+                             </div>
+                            
+                            <div style="margin-bottom: 5px;">
+                                <p class="sub_instruction"><span style="margin-right: 5px;">Step3:</span><span>Select a Machine Learning/Analytics technique you want to use</span></p>
+                                
+                                <br>
+                                <select
+                                id="ML_techniques"
+                                name="ML_techniques"
+                                class="selectpicker form-control">
+                                    {% for technique in techniques %}
+                                    <!-- extracting all the attributes/column headers of GTD -->
+                                    <option href = "{{ technique }}" >{{ technique }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    <button type="submit" id = "result" class = "analyze_button">
+                        Analyze
+                    </button>
+                    </div>
+                <!-- </form> -->
+            </div>
+
+            <div id="Analytics" class="sub_middle">
+                <p class="sub_title">Interpretation of Results</p>
+                <div class = "default_instruction">            
+                    <div style="padding-left: 50px;"><img style = "height: 120px;" src="../static/img/div_middle.png"></div>
+                    <p class="sub_description">When you have choosen the time range, countries and attribute you want explore and clicked the “Analyze” button. Here will be the interpretation of the results and a simple conclusion we could make about them.</p>
+                </div>
+
+            </div>
+
+            <div id="Vis" class="sub_right">
+                <p class="sub_title">Visualization of Results</p>
+                <div class = "default_instruction"> 
+                    <div style="padding-left: 50px;"><img style = "height: 120px;" src="../static/img/div_right.png"></div>
+                    <p class="sub_description">When you have choosen the time range, countries and attribute you want explore and clicked the “Analyze” button. Here will be the visualization of the results.</p>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="footer">
+            <p>Copyright © 2017 All right reserved</p>
+        </div>
+
+
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+        <!-- Websocket library -->
+
+
+        <script src="../static/js/map.js"></script>
+        <script src="../static/js/geoplot.js"></script>
+    </body>
+
+
+</html>

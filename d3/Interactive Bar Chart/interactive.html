@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="../lib/d3.v3.min.js"></script>
+<style>
+
+  .axis {
+    font: 10px sans-serif;
+  }
+
+</style>
+<body>
+  <div id = "chart"></div>
+  <script> var data = [{club:'Manchester United',value:{year_2013:3165, year_2014:2810, year_2015:3100, year_2016:3317, year_2017:4583}},
+  {club:'Chelsea',value:{year_2013:901, year_2014:868, year_2015:1370, year_2016:1661, year_2017:1845}},
+  {club:'Manchester City',value:{year_2013:689, year_2014:863, year_2015:1380, year_2016:1921, year_2017:2083}},
+  {club:'Liverpool',value:{year_2013:651, year_2014:704, year_2015:982, year_2016:1548, year_2017:1492}},
+  {club:'Arsenal',value:{year_2013:1326, year_2014:1331, year_2015:1310, year_2016:2017, year_2017:1932}}];
+
+  var margin = {top: 50, right: 250, bottom: 50, left: 150},
+      width = 1050 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom
+      barheight = 50;
+
+  var tvalue = d3.set(data.map(function(d) {
+  return +d.value.year_2013 + d.value.year_2014 + d.value.year_2015 + d.value.year_2016 + d.value.year_2017;}
+  )).values();
+
+  var xScale = d3.scale.linear()
+                .domain([0, 20000])
+                .range([margin.left, margin.left + width]);
+
+  var clubs = d3.set(data.map(function(d) {return d.club;})).values();
+
+  var yScale = d3.scale.ordinal()
+                .domain(clubs)
+                .rangeRoundBands([margin.top + height, margin.top]);
+
+  var xAxis = d3.svg.axis()
+              .scale(xScale)
+              .orient("bottom")
+              .ticks(10);
+
+  var yAxis = d3.svg.axis()
+              .scale(yScale)
+              .orient("left");
+
+  var svg = d3.select("#chart").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g");
+  
+    svg.append("g")
+      .attr("id", "xAxis")
+      .attr("transform", "translate(0, 450)")
+      .call(xAxis)
+      .selectAll("text")
+      .style("text-anchor", "end");
+
+    svg.append("g")
+      .attr("id", "yAxis")
+      .call(yAxis)
+      .append("text")
+      .attr("transform", "translate(0, 450)")
+      .attr("dy", ".76em")
+      .style("text-anchor", "end");
+
+  var bars = svg.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+      .attr("class", "bar");
+
+  bars.attr("fill", "grey")
+      .attr("x", margin.left)
+      .attr("width", (function(d) {
+  return xScale(+d.value.year_2013 + d.value.year_2014 + d.value.year_2015 + d.value.year_2016 + d.value.year_2017) - margin.left; }))
+      .attr("y", function(d) { return yScale(d.club); })
+      .attr("height", 50)
+      .on('mouseover', mouseOn)
+      .on("mouseout", mouseOff);
+      
+  function mouseOn(d,i) {
+        
+        d3.select(this)
+          .attr("fill", "red"); 
+      
+        var year = [2013, 2014, 2015, 2016, 2017];
+        var worth = [+d.value.year_2013, +d.value.year_2014, +d.value.year_2015, +d.value.year_2016, +d.value.year_2017];
+
+        var yrScale = d3.scale.ordinal()
+                .domain(year)
+                .rangeBands([margin.left + width - 200, margin.left + width + margin.right - 200]);
+
+        var wScale = d3.scale.linear()
+                .domain([d3.extent(worth)[0] - 100, d3.extent(worth)[1] + 100])
+                .range([250, 50]);
+        var line = d3.svg.line()
+                    .x(function(d,i) {return yrScale(year[i]);})
+                    .y(function(d,i) {return wScale(worth[i]);});
+
+        var yrAxis = d3.svg.axis()
+              .scale(yrScale)
+              .orient("bottom")
+              .tickValues(year);
+
+        var wAxis = d3.svg.axis()
+              .scale(wScale)
+              .orient("left")
+              .ticks(10);
+
+        svg.append("text")
+          .attr("x", margin.left+width+75)
+          .attr("y", 270)
+          .style("text-anchor", "middle")
+          .text("Year");
+
+        svg.append("text")
+          .attr("x", margin.left+width-225)
+          .attr("y", 40)
+          .style("text-anchor", "middle")
+          .text("Value");
+
+        var lineg = svg.append("path")
+          .datum(data)
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-linecap", "round")
+          .attr("stroke-width", 1.5)
+          .attr("d", line)
+          .attr("id", "lineg");
+
+        var yrA = svg.append("g")
+          .attr("class", "yrAxis")
+          .call(yrAxis)
+          .attr("transform", "translate(0, 250)");
+
+        var wA = svg.append("g") 
+          .attr("class", "wAxis")
+          .call(wAxis)
+          .attr("transform", "translate(600, 0)");
+        }
+
+    function mouseOff(d,i) { 
+        d3.select(this)
+          .attr("fill", "grey"); 
+        svg.append("rect")
+          .attr("x", margin.left+width-250)
+          .attr("y", 25)
+          .attr("width", margin.right+100)
+          .attr("height", 250)
+          .style("fill", "white");
+        }
+
+  var yLabels = svg.selectAll(".yLabel")
+            .data(clubs)
+            .enter().append("text")
+            .text(function (d){ return d;})
+            .attr("x", margin.left/2)
+            .attr("y", function (d, i) { return margin.top + height - 50 - i * 80;})
+            .style("text-anchor", "middle");
+
+  var vLabels = svg.selectAll(".vLabel")
+            .data(data)
+            .enter().append("text")
+            .text(function (d){ return "$" + (d.value.year_2013 + d.value.year_2014 + d.value.year_2015 + d.value.year_2016 + d.value.year_2017).toString();})
+            .attr("x", margin.left + 50)
+            .attr("y", function (d, i) { return margin.top + height - 50 - i * 80;})
+            .style("text-anchor", "middle")
+            .style("fill", "white");
+
+</script>
+</body>
+</html>

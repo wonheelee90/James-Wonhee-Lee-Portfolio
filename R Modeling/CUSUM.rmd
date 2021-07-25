@@ -1,0 +1,97 @@
+---
+title: "Homework 3 Q3"
+author: "Wonhee Lee, Eugene Kang"
+date: "September 13, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read in weather data
+``` {r}
+temps <- read.table("temps.txt", header = TRUE)
+```
+
+# Part 1
+## Compute the mean across columns 2:21 to get the mean average each year
+``` {r}
+mu <- apply(temps[ ,2:ncol(temps)], 2, mean)
+```
+
+## Change the DAY column to characters for ease of transfer later on to another data frame
+``` {r}
+temps$DAY <- as.character(temps$DAY)
+```
+
+## Create a st.temps data.frame that we will use to fill in with St values.
+``` {r}
+st.temps <- temps
+```
+
+## We will try different C and T values to determine optimal parameters. After trial-and-error, we have chosen C = 3 and T = 15.
+## We will first populate the St tables with St values.
+``` {r}
+C <- 3
+Tval <- 15
+st.temps[1, 2:ncol(st.temps)] = 0
+for (i in 2:nrow(st.temps)) {
+    for (j in 2:ncol(st.temps)) {
+        st.temps[i, j] = max(0, st.temps[i-1, j] + (mu[j-1] - temps[i,j] - C))
+        j = j+1
+    }
+    i = i+1
+}
+head(st.temps)
+```
+
+## Then we will populate the St tables with booleans of whether St has exceeded the T value specified.
+``` {r}
+for (i in 2:nrow(st.temps)) {
+    for (j in 2:ncol(st.temps)) {
+        st.temps[i,j] = st.temps[i,j] > Tval
+        j = i+1
+    }
+    i = i+1
+}
+head(st.temps)
+```
+
+## Finally, we use the code below to store first days of change detection for each year.
+``` {r}
+first_change_days <- data.frame(matrix(nrow = 1, ncol=20))
+colnames(first_change_days) = colnames(st.temps)[2:ncol(st.temps)]
+for (k in 2:ncol(st.temps)) {
+    trues = which(st.temps[,k] == 1)
+    first_change_days[k-1] = st.temps[trues[1], 1]
+}
+first_change_days <- as.character(first_change_days)
+first_change_days
+```
+
+# Part 2
+## To see if whether Atlanta's climate has gotten warmer during 1996-2015, we used average temperatures of summers as we determined previously.
+## In order to do this, we took the mean of all "summer" temperatures for each year as determined by our CUSUM model in part 1.
+``` {r}
+summer.mu <- vector(mode = "numeric", length=20)
+for (i in 1:length(summer.mu)) {
+    summer.mu[i] = mean(temps[1:(which(temps$DAY == first_change_days[i]) - 1),i+1])
+}
+mu.summer.mu <- mean(summer.mu)
+```
+
+## Next, we populated the Sts for the average summer temperatures.
+``` {r}
+st.summer.mu <- vector(mode = "numeric", length=20)
+st.summer.mu[1] = 0
+for (i in 2:length(st.summer.mu)) {
+    st.summer.mu[i] = max(0, st.summer.mu[i-1] + (summer.mu[i] - mu.summer.mu - C))
+}
+st.summer.mu
+```
+
+## We notice that there are no St values exceeding T, and conclude that we do not detect a change in summer temperatures in Atlanta from 1996-2015.
+``` {r}
+st.summer.mu > Tval
+```

@@ -1,0 +1,6 @@
+A.
+The 1st scatter plot(plasma glucose vs insulin) is the better plot for separating the classes. We can observe that there is a more pronounced split, particularly in the plasma glucose values between classes, where as in the 2nd plot there is a cluster of both classes in the center.
+
+C.
+The sqrt scale is useful when a big portion of the data is concentrated in the lower end of the range of values.
+The log scale is useful when attempting to derive a linear relationship from skewed data.

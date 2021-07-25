@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>F1 Sankey Chart</title>
+<style>
+
+.node rect {
+  cursor: move;
+  shape-rendering: crispEdges;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .4;
+}
+
+</style>
+<body>
+
+<p id="chart">
+
+<script src="../lib/d3.v3.min.js"></script>
+<script src="../lib/sankey.js"></script>
+<script src="../lib/d3-queue.v3.min.js"></script>
+<script src="../lib/d3.tip.v0.6.3.js"></script>
+<script>
+	
+var units = "Points";
+
+var margin = {top: 50, right: 50, bottom: 50, left: 50},
+    width = 1000 - margin.left - margin.right,
+    height = 550 - margin.top - margin.bottom;
+
+var tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([10,0])
+                .html(function(d){
+                  return d.source.node + " - " + d.target.node + " - " + d.value + " points";
+                });
+
+var formatNumber = d3.format(",.0f"),    // zero decimal places
+    format = function(d) { return formatNumber(d) + " " + units; },
+    color = d3.scale.category20();
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .call(tip)
+    .append("g")
+    .attr("transform", 
+          "translate(" + margin.left + "," + margin.top + ")");
+
+var sankey = d3.sankey()
+    .nodeWidth(36)
+    .nodePadding(3)
+    .size([width, height]);
+
+var path = sankey.link();
+
+d3.queue()
+.defer(d3.csv, "races.csv")
+.defer(d3.csv, "teams.csv")
+.await(function(error, races, teams) {
+
+    var links = [];
+    var nodes = [];
+    
+races.forEach(function (d, i) {
+    nodes.push({ "name": d.race });
+    nodes.push({ "name": d.driver });
+    links.push({ "source": d.race, "target": d.driver, "value": +d.points });
+}); 
+
+teams.forEach(function (d, i) {
+    nodes.push({ "name": d.driver });
+    nodes.push({ "name": d.team });
+    links.push({ "source": d.driver, "target": d.team, "value": +d.points });
+});
+
+nodes = d3.keys(d3.nest()
+                .key(function (d) { return d.name; })
+                .map(nodes));
+
+links.forEach(function (d, i) {
+    links[i].source = nodes.indexOf(links[i].source);
+    links[i].target = nodes.indexOf(links[i].target);
+});
+
+nodes.forEach(function (d, i) {
+    nodes[i] = {"node": d, "name": d };
+});
+
+  sankey
+      .nodes(nodes)
+      .links(links)
+      .layout(32);
+
+  var link = svg.append("g").selectAll(".link")
+      .data(links)
+      .enter().append("path")
+      .attr("class", "link")
+      .attr("d", path)
+      .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+      .sort(function(a, b) { return b.dy - a.dy; })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
+
+  var node = svg.append("g").selectAll(".node")
+      .data(nodes)
+      .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { 
+		  return "translate(" + d.x + "," + d.y + ")"; })
+      .call(d3.behavior.drag()
+      .origin(function(d) { return d; })
+      .on("dragstart", function() { 
+		  this.parentNode.appendChild(this); })
+      .on("drag", dragmove));
+
+  node.append("rect")
+      .attr("height", function(d) { return d.dy; })
+      .attr("width", sankey.nodeWidth()*2)
+      .style("fill", function(d) { 
+		  return d.color = color(d.name.replace(/ .*/, "")); })
+      .style("stroke", function(d) { 
+		  return d3.rgb(d.color).darker(5); });
+
+  node.append("text")
+      .attr("x", 0)
+      .attr("y", function(d) { return d.dy / 2; })
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate(40,0)")
+      .text(function(d) { return d.name; })
+      .style("font-size", "10px")
+      .filter(function(d) { return d.x < width / 2; })
+      .attr("x", 6 + sankey.nodeWidth())
+      .attr("text-anchor", "start")
+      .attr("transform", "translate(-45,0)");
+
+  function dragmove(d) {
+    d3.select(this).attr("transform", 
+        "translate(" + d.x + "," + (
+                d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
+            ) + ")");
+    sankey.relayout();
+    link.attr("d", path);
+  }
+});
+
+</script>
+
+</body>
+</html>

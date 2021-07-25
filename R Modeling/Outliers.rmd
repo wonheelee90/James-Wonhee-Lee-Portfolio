@@ -1,0 +1,47 @@
+---
+title: "Homework 3 Q1"
+author: "Wonhee Lee, Eugene Kang"
+date: "September 13, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load crime data
+
+```{r data}
+crime <- read.table("uscrime.txt", header = TRUE)
+head(crime)
+```
+
+
+## Plot crime data to get a sense of the distribution of data points
+
+```{r crime}
+plot(crime$Crime)
+```
+
+## Install & load outliers package
+
+```{r package}
+library(outliers)
+```
+
+## Perform grubbs.test to check for outliers. For the purpose of this analysis, we will assume an alpha of .05.
+### Check for highest value(1993)
+```{r high}
+high = grubbs.test(crime$Crime, type=10)
+high
+high$p.value < .05
+```
+### Since p-value is greater than alpha, we fail to reject the null hypothesis that 1993 is not an outlier.
+
+### Check for lowerst value(342)
+```{r low}
+low = grubbs.test(crime$Crime, type=10, opposite = TRUE)
+low
+low$p.value < .05
+```
+### Since p-value is greater than alpha, we fail to reject the null hypothesis that 342 is not an outlier.

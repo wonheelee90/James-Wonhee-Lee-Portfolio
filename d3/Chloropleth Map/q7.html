@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.states {
+  fill: none;
+  stroke: #fff;
+}
+
+div.tooltip {   
+  position: absolute;           
+  font-size: 13px;
+  text-align: center;           
+  width: 180px;                  
+  height: 70px;                 
+  padding: 1px;             
+  background: #fff;
+  border: 3px;      
+  pointer-events: none;         
+}        
+
+</style>
+<svg width="1260" height="600"></svg>
+<script src="../lib/d3.v3.min.js"></script>
+<script src="../lib/d3-queue.v3.min.js"></script>
+<script src="../lib/topojson.v1.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+var path = d3.geo.path();
+
+var x = d3.scale.linear()
+    .domain([12500, 35000])
+    .rangeRound([400, 850]);
+
+var colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"];
+
+var color = d3.scale.threshold()
+    .domain([15000, 17500, 20000, 22500, 25000, 27500, 30000, 32500])
+    .range(colors);
+
+var g = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(0,40)");
+
+g.selectAll("rect")
+  .data(color.range().map(function(d) {
+      d = color.invertExtent(d);
+      if (d[0] == undefined) {d[0] = 12500};
+      if (d[1] == undefined) {d[1] = 35000};
+      return d;
+    }))
+  .enter().append("rect")
+    .attr("height", 16)
+    .attr("x", function(d) { return x(d[0]); })
+    .attr("y", -10)
+    .attr("width", function(d) { return 50; })
+    .attr("fill", function(d) { return color(d[0]); });
+
+g.append("text")
+    .attr("x", x.range()[0])
+    .attr("y", -15)
+    .attr("fill", "#000")
+    .attr("text-anchor", "start")
+    .attr("font-weight", "bold")
+    .text("Median Earnings by State($)");
+
+g.call(d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+    .tickSize(5)
+    .tickFormat(function(x, i) { return i ? x : x; })
+    .tickValues(color.domain()))
+    .select(".domain")
+    .remove();
+
+d3.queue()
+    .defer(d3.json, "us.json")
+    .defer(d3.json, "median_earnings.json")
+    .defer(d3.csv, "median_ages.csv")
+    .await(ready);
+
+function ready(error, us, earnings, ages) {
+  if (error) throw error;
+
+  var cEarnings = {};
+
+  earnings.forEach(function(d) {
+    cEarnings[d.id] = + d.median_earnings;
+  });
+
+  ages.forEach(function(d) {
+    d.median_age = +d.median_age;
+  });
+
+  var div = d3.select("body").append("div")   
+  .attr("class", "tooltip")               
+  .style("opacity", 0);
+
+  var nested = d3.nest()
+                .key(function(d) {return d.id;})
+                .entries(ages);
+
+  nested.forEach(function(d) {
+    d.values = d.values.sort(function(x, y){
+   return d3.ascending(x.median_age, y.median_age);
+    })
+    d.values = d.values.slice(0,5);
+  });
+
+  var keys = {};
+  nested.forEach(function(d){
+    keys[d.key] = d.values;
+  })
+
+  var textadd = function(d) {
+    var text = "";
+    if (keys[d.id] == undefined) {
+        return text;
+      }
+    for (var i = 0; i < keys[d.id].length; i++) {
+      if (keys[d.id][i]) {
+        text+= keys[d.id][i].name + " (Age: " + keys[d.id][i].median_age + ")" + "<br/>";
+      }
+      else {
+        break;
+      }
+    }
+    return text;
+  }
+
+  svg.append("g")
+      .attr("class", "states")
+      .attr("transform", "translate(0,50)")
+      .selectAll("path")
+      .data(topojson.feature(us, us.objects.states).features)
+      .enter().append("path")
+      .attr("fill", function(d) {
+        return color(cEarnings[d.id]);
+      })
+      .attr("d", path)
+      .on("mouseover", function(d) {
+      d3.select(this).transition().duration(100).style("opacity", 1);
+      div.transition().duration(100)
+      .style("opacity", 1)
+      div.html(textadd(d))
+      .style("left", (d3.event.pageX) + "px")
+      .style("top", (d3.event.pageY) + "px");
+    })
+      .on("mouseout", function() {
+      d3.select(this)
+      div.transition().duration(100)
+      .style("opacity", 0);
+    });
+
+  svg.append("path")
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .attr("class", "states")
+      .attr("transform", "translate(0,50)")
+      .attr("d", path);
+
+  };
+
+</script>

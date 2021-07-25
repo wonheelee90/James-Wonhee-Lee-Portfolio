@@ -1,0 +1,10 @@
+- In line 12, I create the case class Network which has the formatting of the dataframe.
+- In the main function, I read the file in line 20.
+- In line 23, I map the file to a dataframe.
+- In line 27, I filter out the entries with weight < 5.
+- In line 30-31, I aggregate weights based on source.
+- In line 34-35, I aggregate weights based on target.
+- In line 38, I join the two dataframes based on the node(source = target).
+- In lines 41-42, I rename the columns of the joined dataframe to distinguish between source and target weights.
+- In line 45, I create a new column that returns the gross accumulated node weight and select only the node and node weight columns.
+- In line 49, I write the final dataframe to the file.

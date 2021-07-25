@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial;
+    padding: 10px;
+    background: transparent;
+}
+
+html {
+  background: url(/static/big.jpg) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+/* Header/Blog Title */
+.header {
+    padding: 30px;
+    text-align: center;
+
+    background: url('/static/wine.jpg');
+    background-size: 100% 99.9%;
+
+}
+
+.bag_image {
+    padding: 30px;
+
+    background: url('/static/nan.png');
+
+    background-size: 100% 100%;;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.left_image_one {
+    padding: 30px;
+
+    margin-top: 20px;
+        background: url('static/background.jpg');
+    background-size:  100% 50%;
+    background: url('/static/by_country.png');
+
+    background-size: 100% 100%;;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.right_image_one {
+    padding: 30px;
+
+    margin-top: 20px;
+        background: url('static/background.jpg');
+    background-size:  100% 100%;
+    background: url('/static/note1.jpg');
+
+    background-size: 100% 100%;;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.right_image_two {
+    padding: 30px;
+
+    margin-top: 20px;
+        background: url('/static/background.jpg');
+    background-size:  100% 100%;
+    background: url('/static/note2.jpg');
+
+    background-size: 100% 100%;;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.right_image_three {
+    padding: 30px;
+
+    margin-top: 20px;
+        background: url('static/background.jpg');
+    background-size:  100% 100%;
+    background: url('/static/note3.jpg');
+
+    background-size: 100% 100%;;
+background-repeat: no-repeat;
+background-position: center;
+}
+
+.header h1 {
+    font-size: 50px;
+}
+
+/* Style the top navigation bar */
+.topnav {
+    overflow: hidden;
+    background-color: #333;
+}
+
+/* Style the topnav links */
+.topnav a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+/* Change color on hover */
+.topnav a:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+/* Create two unequal columns that floats next to each other */
+/* Left column */
+.leftcolumn {
+    float: left;
+    width: 75%;
+}
+
+/* Right column */
+.rightcolumn {
+    float: right;
+    width: 25%;
+    background-color: #f1f1f1;
+    padding-left: 20px;
+}
+
+
+
+
+/* Add a card effect for articles */
+.card {
+    padding: 20px;
+    margin-top: 20px;
+    background-size:  100% 100%;
+}
+
+.right_card {
+
+    padding: 20px;
+    margin-top: 20px;
+        background : transparent;
+    background-size:  100% 100%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Footer */
+.footer {
+    padding: 5px;
+    text-align: center;
+    background: transparent;
+    margin-top: 5px;
+}
+
+/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 800px) {
+    .leftcolumn, .rightcolumn {
+        width: 100%;
+        padding: 0;
+    }
+}
+
+/* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+@media screen and (max-width: 400px) {
+    .topnav a {
+        float: none;
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body>
+
+  <div class="header">
+  <h1>Wine Recommendation</h1>
+</div>
+
+
+<div class="topnav">
+  <a href="/">Find Your Wine!</a>
+  <a href="method.html">Recommendation Methodology</a>
+  <a href="dataset.html">Wine Reviews Dataset</a>
+  <a href="diagnostics.html">Diagnostics</a>
+  <a href="analysis.html">What do experts value?</a>
+  <a href="http://www.decanter.com/learn/advice/understand-tasting-notes-decoded-344920" style="float:right">Taste Note</a>
+</div>
+
+<div class="row">
+  <div class="leftcolumn">
+    
+
+
+    <div class="card"><a href="bottom"></a>
+      <h2>The Wine Reviews Dataset</h2>
+      <h5>The Wine Reviews Dataset we worked with was taken from Kaggle. It contains 130,000 wine reviews with variety, location, winery, price, points, and description information on over 110,000 unique wine products. </h5>
+      <h5>The data was originally scraped from WineEnthusiast, a website containing various reviews and information about wine. </h5>
+      <h5>Please click on the wine image below for details about the dataset. </h5>
+      <a href="https://www.kaggle.com/zynicide/wine-reviews">
+      	<img src="/static/wine_img.jpeg"></a>
+      <h5>Please click on the logo below for a link to WineEnthusiast. </h5>
+      <a href="https://www.winemag.com/">
+      	<img src="/static/wine_enthusiast.png"></a>
+    </div>
+
+  </div>
+  <div class="rightcolumn">
+    <div class="right_card">
+      <h2></h2>
+      <div class="right_image_one" style="height:300px;"></div>
+      <p><a href="/static/note1.jpg">click to enlarge</a></p>
+    </div>
+    <div class="right_card">
+      <h2></h2>
+      <div class="right_image_three" style="height:300px;"></div>
+      <p><a href="/static/note3.jpg">click to enlarge</a></p>
+    </div>
+    <div class="right_card">
+      <h2></h2>
+      <div class="right_image_two" style="height:300px;"></div>
+      <p><a href="/static/note2.jpg">click to enlarge</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Footer</p>
+      <p>Posted by: CS4400X Team1</p>
+  <p>2018 Spring</p>
+</div>
+
+</body>
+</html>

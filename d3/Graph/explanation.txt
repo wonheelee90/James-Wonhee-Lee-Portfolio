@@ -1,0 +1,1 @@
+I chose to linearly scale the radii by degree on a scale from 1 to 15 because given our network, it highlights nodes with high degrees vs. those with low degrees at a quick glance.

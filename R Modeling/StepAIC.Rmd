@@ -1,0 +1,68 @@
+---
+title: "Homework 5 Q2"
+author: "Wonhee Lee, Eugene Kang"
+date: "September 26, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read in data
+
+```{r data}
+crime <- read.table("uscrime.txt", header =T)
+head(crime)
+```
+
+## Set up model w/ all predictors
+
+```{r model}
+model <- lm(Crime ~., crime)
+summary(model)
+```
+
+## Predict with model
+```{r predict}
+newdata <- data.frame('M' = 14.0,
+                      'So' = 0,
+                      'Ed' = 10.0,
+                      'Po1' = 12.0,
+                      'Po2' = 15.5,
+                      'LF' = 0.640,
+                      'M.F' = 94.0,
+                      'Pop' = 150,
+                      'NW' = 1.1,
+                      'U1' = 0.120,
+                      'U2' = 3.6,
+                      'Wealth' = 3200,
+                      'Ineq' = 20.1,
+                      'Prob' = 0.04,
+                      'Time' = 39.0)
+pred1 <- predict(model, newdata)
+```
+
+## Set up model w/ select predictors using stepAIC function in R
+
+```{r model2}
+library(MASS)
+model2 <- stepAIC(model)
+summary(model2)
+```
+
+## Predict with model2
+```{r predict2}
+pred2 <- predict(model2, newdata)
+```
+
+## Compare adjusted r-squared values
+```{r rsq}
+data.frame('model1' = summary(model)$adj.r.squared, 'model2' = summary(model2)$adj.r.squared)
+```
+
+## In comparing the predictions, we find the result from model2 more reasonable as it is within the range of Crime values in the data set.
+```{r result}
+data.frame('model1' = pred1, 'model2' = pred2)
+range(crime$Crime)
+```

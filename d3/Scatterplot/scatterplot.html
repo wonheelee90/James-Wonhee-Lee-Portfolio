@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<script type="text/javascript" src="../lib/d3.v3.min.js"></script>
+		<style type="text/css">
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: crispEdges;
+			}
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript" >
+		
+			d3.csv("diabetes.csv", function(d) {
+   				return {
+					pregnant_times : +d.pregnant_times,
+					plasma_glucose : +d.plasma_glucose,
+					blood_pressure : +d.blood_pressure,
+					skin_thickness : +d.skin_thickness,
+					insulin : +d.insulin,
+					bmi : +d.bmi,
+					pedigree : +d.pedigree,
+					age : +d.age,
+					class : +d.class
+					};
+			}, function(data) {
+
+			var w = 1000;
+			var h = 2500;
+			var margin = {top: 100, bottom:100, left:100, right:100};
+
+			//Plasma_glucose vs. Insulin
+			var xScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.plasma_glucose; })])
+								 .range([margin.left, w - margin.right]);
+
+			var yScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.insulin; })])
+								 .range([500 - margin.bottom, margin.top]);
+
+			var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom")
+							  .ticks(10);
+
+			var yAxis = d3.svg.axis()
+							  .scale(yScale)
+							  .orient("left")
+							  .ticks(10);
+
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+
+			svg.selectAll(".dot")
+			   .data(data)
+			   .enter()
+			   .append("path")
+			   .attr("d", d3.svg.symbol().type(function(d) {
+			   	if (d.class > 0) {
+			   		return "triangle-up";
+			   	}
+			   	else {
+			   		return "circle";
+			   	}
+			   }))
+			   .attr("fill", function(d) {
+			   	if (d.class > 0) {
+			   		return "red";
+			   	}
+			   	else {
+			   		return "blue";
+			   	}
+			   	})
+			   .attr("transform", function(d) {
+			   	return "translate(" + xScale(d.plasma_glucose) + "," + yScale(d.insulin) + ")"});
+
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (500 - margin.bottom) + ")")
+				.call(xAxis);
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + margin.left + ",0)")
+				.call(yAxis);
+
+			svg.append("text")
+				.attr("x", (w/2))
+				.attr("y", (margin.top/2))
+				.style("text-anchor", "middle")
+				.style("font-size", "15px")
+				.style("font-weight", "bold")
+				.text("Plasma Glucose vs. Insulin");
+
+			svg.append("text")
+				.attr("x", 30)
+				.attr("y", 100)
+				.text("Insulin");
+
+			svg.append("text")
+				.attr("x", 800)
+				.attr("y", 440)
+				.text("Plasma Glucose");
+
+			var classes = ["negative", "positive"];
+
+			var legend = svg.selectAll(".legend")
+      			.data(classes)
+    			.enter().append("g")
+			    .attr("class", "legend")
+      			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")";
+      			});
+
+	  		legend.append("path")
+      			.attr("d", d3.svg.symbol().type(function(d) {
+      				if (d == "negative") {
+      					return "circle";
+      				}
+      				else {
+      					return "triangle-up";
+      				}}))
+      			.attr("transform", function(d, i) { return "translate(100," + 50 + ")";})
+      			.style("fill", function(d) {
+      				if (d == "negative") {
+      					return "blue";
+      				}
+      				else {
+      					return "red";
+      				}
+      			});
+      			
+      		legend.append("text")
+      			.attr("x", 175)
+      			.attr("y", 50)
+      			.attr("dy", ".35em")
+      			.style("text-anchor", "end")
+      			.text(function(d) {
+      				return d;}
+      			);
+
+		
+			//BMI vs. Blood Pressure
+			var BMIScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.bmi; })])
+								 .range([margin.left, w - margin.right]);
+
+			var BPScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.blood_pressure; })])
+								 .range([1000 - margin.bottom, 500 +margin.top]);
+
+			var BMIAxis = d3.svg.axis()
+							  .scale(BMIScale)
+							  .orient("bottom")
+							  .ticks(10);
+
+			var BPAxis = d3.svg.axis()
+							  .scale(BPScale)
+							  .orient("left")
+							  .ticks(10);
+
+			svg.selectAll(".dot")
+			   .data(data)
+			   .enter()
+			   .append("path")
+			   .attr("d", d3.svg.symbol().type(function(d) {
+			   	if (d.class > 0) {
+			   		return "triangle-up";
+			   	}
+			   	else {
+			   		return "circle";
+			   	}
+			   }))
+			   .attr("fill", function(d) {
+			   	if (d.class > 0) {
+			   		return "red";
+			   	}
+			   	else {
+			   		return "blue";
+			   	}
+			   	})
+			   .attr("transform", function(d) {
+			   	return "translate(" + BMIScale(d.bmi) + "," + BPScale(d.blood_pressure) + ")"});
+
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (1000 - margin.bottom) + ")")
+				.call(BMIAxis);
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + margin.left + ",0)")
+				.call(BPAxis);
+
+			svg.append("text")
+				.attr("x", (w/2))
+				.attr("y", (500 + margin.top/2))
+				.style("text-anchor", "middle")
+				.style("font-size", "15px")
+				.style("font-weight", "bold")
+				.text("BMI vs. Blood Pressure");
+
+			svg.append("text")
+				.attr("x", 30)
+				.attr("y", 590)
+				.style("text-anchor", "start")
+				.text("Blood Pressure");
+
+			svg.append("text")
+				.attr("x", 900)
+				.attr("y", 930)
+				.style("text-anchor", "end")
+				.text("BMI");
+
+			var legend2 = svg.selectAll(".legend2")
+      			.data(classes)
+    			.enter().append("g")
+			    .attr("class", "legend2")
+      			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")";
+      			});
+
+	  		legend2.append("path")
+      			.attr("d", d3.svg.symbol().type(function(d) {
+      				if (d == "negative") {
+      					return "circle";
+      				}
+      				else {
+      					return "triangle-up";
+      				}}))
+      			.attr("transform", function(d, i) { return "translate(100," + 550 + ")";})
+      			.style("fill", function(d) {
+      				if (d == "negative") {
+      					return "blue";
+      				}
+      				else {
+      					return "red";
+      				}
+      			});
+      			
+      		legend2.append("text")
+      			.attr("x", 175)
+      			.attr("y", 550)
+      			.attr("dy", ".35em")
+      			.style("text-anchor", "end")
+      			.text(function(d) {
+      				return d;}
+      			);
+
+			//Plasma_glucose vs. Insulin scaled
+			var xScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.plasma_glucose; })])
+								 .range([margin.left, w - margin.right]);
+
+			var yScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.insulin; })])
+								 .range([1500 - margin.bottom, 1000 +margin.top]);
+
+			var rScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.insulin*d.plasma_glucose; })])
+								 .range([10, 100]);
+
+			var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom")
+							  .ticks(10);
+
+			var yAxis = d3.svg.axis()
+							  .scale(yScale)
+							  .orient("left")
+							  .ticks(10);
+
+			svg.selectAll(".dot")
+			   .data(data)
+			   .enter()
+			   .append("path")
+			   .attr("d", d3.svg.symbol().type(function(d) {
+			   	if (d.class > 0) {
+			   		return "triangle-up";
+			   	}
+			   	else {
+			   		return "circle";
+			   	}
+			   }).size(function(d) {
+			   	return rScale(d.insulin*d.plasma_glucose);
+			   }))
+			   .attr("fill", function(d) {
+			   	if (d.class > 0) {
+			   		return "red";
+			   	}
+			   	else {
+			   		return "blue";
+			   	}
+			   	})
+			   .attr("transform", function(d) {
+			   	return "translate(" + xScale(d.plasma_glucose) + "," + yScale(d.insulin) + ")"});
+
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (1500 - margin.bottom) + ")")
+				.call(xAxis);
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + margin.left + ",0)")
+				.call(yAxis);
+
+			svg.append("text")
+				.attr("x", (w/2))
+				.attr("y", (1000 + margin.top/2))
+				.style("text-anchor", "middle")
+				.style("font-size", "15px")
+				.style("font-weight", "bold")
+				.text("Plasma Glucose vs. Insulin, scaled symbols");
+
+			svg.append("text")
+				.attr("x", 30)
+				.attr("y", 1100)
+				.text("Insulin");
+
+			svg.append("text")
+				.attr("x", 800)
+				.attr("y", 1440)
+				.text("Plasma Glucose");
+
+			var legend3 = svg.selectAll(".legend3")
+      			.data(classes)
+    			.enter().append("g")
+			    .attr("class", "legend3")
+      			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")";
+      			});
+
+	  		legend3.append("path")
+      			.attr("d", d3.svg.symbol().type(function(d) {
+      				if (d == "negative") {
+      					return "circle";
+      				}
+      				else {
+      					return "triangle-up";
+      				}}))
+      			.attr("transform", function(d, i) { return "translate(100," + 1050 + ")";})
+      			.style("fill", function(d) {
+      				if (d == "negative") {
+      					return "blue";
+      				}
+      				else {
+      					return "red";
+      				}
+      			});
+      			
+      		legend3.append("text")
+      			.attr("x", 175)
+      			.attr("y", 1050)
+      			.attr("dy", ".35em")
+      			.style("text-anchor", "end")
+      			.text(function(d) {
+      				return d;}
+      			);
+
+      		//Plasma_glucose vs. Insulin sqrt scaled
+			var xScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.plasma_glucose; })])
+								 .range([margin.left, w - margin.right]);
+
+			var yScale = d3.scale.sqrt()
+								 .domain([0, d3.max(data, function(d) { return d.insulin; })])
+								 .range([2000 - margin.bottom, 1500 +margin.top]);
+
+			var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom")
+							  .ticks(10);
+
+			var yAxis = d3.svg.axis()
+							  .scale(yScale)
+							  .orient("left")
+							  .ticks(10);
+
+			svg.selectAll(".dot")
+			   .data(data)
+			   .enter()
+			   .append("path")
+			   .attr("d", d3.svg.symbol().type(function(d) {
+			   	if (d.class > 0) {
+			   		return "triangle-up";
+			   	}
+			   	else {
+			   		return "circle";
+			   	}
+			   }))
+			   .attr("fill", function(d) {
+			   	if (d.class > 0) {
+			   		return "red";
+			   	}
+			   	else {
+			   		return "blue";
+			   	}
+			   	})
+			   .attr("transform", function(d) {
+			   	return "translate(" + xScale(d.plasma_glucose) + "," + yScale(d.insulin) + ")"});
+
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (2000 - margin.bottom) + ")")
+				.call(xAxis);
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + margin.left + ",0)")
+				.call(yAxis);
+
+			svg.append("text")
+				.attr("x", (w/2))
+				.attr("y", (1500 + margin.top/2))
+				.style("text-anchor", "middle")
+				.style("font-size", "15px")
+				.style("font-weight", "bold")
+				.text("Plasma Glucose vs. Insulin (square-root-scaled)");
+
+			svg.append("text")
+				.attr("x", 30)
+				.attr("y", 1600)
+				.text("Insulin");
+
+			svg.append("text")
+				.attr("x", 800)
+				.attr("y", 1940)
+				.text("Plasma Glucose");
+
+			var classes = ["negative", "positive"];
+
+			var legend4 = svg.selectAll(".legend4")
+      			.data(classes)
+    			.enter().append("g")
+			    .attr("class", "legend4")
+      			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")";
+      			});
+
+	  		legend4.append("path")
+      			.attr("d", d3.svg.symbol().type(function(d) {
+      				if (d == "negative") {
+      					return "circle";
+      				}
+      				else {
+      					return "triangle-up";
+      				}}))
+      			.attr("transform", function(d, i) { return "translate(100," + 1550 + ")";})
+      			.style("fill", function(d) {
+      				if (d == "negative") {
+      					return "blue";
+      				}
+      				else {
+      					return "red";
+      				}
+      			});
+      			
+      		legend4.append("text")
+      			.attr("x", 175)
+      			.attr("y", 1550)
+      			.attr("dy", ".35em")
+      			.style("text-anchor", "end")
+      			.text(function(d) {
+      				return d;}
+      			);
+
+      		//Plasma_glucose vs. Insulin log scaled
+			var xScale = d3.scale.linear()
+								 .domain([0, d3.max(data, function(d) { return d.plasma_glucose; })])
+								 .range([margin.left, w - margin.right]);
+
+			var yScale = d3.scale.log()
+								 .domain([1, d3.max(data, function(d) { return d.insulin+1; })])
+								 .range([2500 - margin.bottom, 2000 +margin.top]);
+
+			var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom")
+							  .ticks(10);
+
+			var yAxis = d3.svg.axis()
+							  .scale(yScale)
+							  .orient("left")
+							  .ticks(10);
+
+			svg.selectAll(".dot")
+			   .data(data)
+			   .enter()
+			   .append("path")
+			   .attr("d", d3.svg.symbol().type(function(d) {
+			   	if (d.class > 0) {
+			   		return "triangle-up";
+			   	}
+			   	else {
+			   		return "circle";
+			   	}
+			   }))
+			   .attr("fill", function(d) {
+			   	if (d.class > 0) {
+			   		return "red";
+			   	}
+			   	else {
+			   		return "blue";
+			   	}
+			   	})
+			   .attr("transform", function(d) {
+			   	return "translate(" + xScale(d.plasma_glucose) + "," + yScale(d.insulin+1) + ")"});
+
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(0," + (2500 - margin.bottom) + ")")
+				.call(xAxis);
+			
+			svg.append("g")
+				.attr("class", "axis")
+				.attr("transform", "translate(" + margin.left + ",0)")
+				.call(yAxis);
+
+			var classes = ["negative", "positive"];
+
+			svg.append("text")
+				.attr("x", (w/2))
+				.attr("y", (2000 + margin.top/2))
+				.style("text-anchor", "middle")
+				.style("font-size", "15px")
+				.style("font-weight", "bold")
+				.text("Plasma Glucose vs. Insulin (log-scaled)");
+
+			svg.append("text")
+				.attr("x", 30)
+				.attr("y", 2100)
+				.text("Insulin");
+
+			svg.append("text")
+				.attr("x", 800)
+				.attr("y", 2440)
+				.text("Plasma Glucose");
+
+			var legend5 = svg.selectAll(".legend5")
+      			.data(classes)
+    			.enter().append("g")
+			    .attr("class", "legend5")
+      			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")";
+      			});
+
+	  		legend5.append("path")
+      			.attr("d", d3.svg.symbol().type(function(d) {
+      				if (d == "negative") {
+      					return "circle";
+      				}
+      				else {
+      					return "triangle-up";
+      				}}))
+      			.attr("transform", function(d, i) { return "translate(100," + 2050 + ")";})
+      			.style("fill", function(d) {
+      				if (d == "negative") {
+      					return "blue";
+      				}
+      				else {
+      					return "red";
+      				}
+      			});
+      			
+      		legend5.append("text")
+      			.attr("x", 175)
+      			.attr("y", 2050)
+      			.attr("dy", ".35em")
+      			.style("text-anchor", "end")
+      			.text(function(d) {
+      				return d;}
+      			);
+
+			});
+
+			
+		</script>
+	</body>
+</html>
